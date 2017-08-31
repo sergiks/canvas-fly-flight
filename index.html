@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="">
+<head>
+    <meta charset="utf-8">
+
+    <title>Insect flight simulator</title>
+	<style>
+		body{ background-color:#333}
+		canvas {border:1px solid #888}
+		.centered {
+			width:1280px;
+			margin:	10px auto;
+			text-align: center;
+			color: #999;
+			font-family: Helvetica, Tahoma, Arial, sans-serif;
+		}
+   </style>
+</head>
+
+<body>
+	
+	<script>
+		// create canvas
+		var canvas = document.createElement('canvas')
+			, ctx = canvas.getContext('2d')
+			, divCanvas = document.createElement('div')
+			, i
+			, Point = function( x, y) { this.x = x || 0, this.y = y || 0 }
+			, n = 4
+			, chain = [] // Target is [0], fly is the last element of chain
+			, radius = 160		// min distance to create a link, in px
+			, getRnd = function( max){ return Math.floor( max * Math.random()); }
+		;
+
+		// setup canvas
+		canvas.width = 500;
+		canvas.height = 500;
+
+		divCanvas.appendChild(canvas);
+		divCanvas.className = "centered";
+		document.body.appendChild(divCanvas);
+		
+		// initialize points
+		for( i = 0; i < n; i++) chain.push( new Point( 0, 0));
+		
+		
+		function render() {
+			var target
+				, fly
+				, dx
+				, dy
+				, i
+				, point
+				, k = 0.08
+			;
+			
+			window.requestAnimationFrame(render);
+			
+			target = chain[0];
+			fly = chain[ chain.length - 1];
+			
+			// check distance from fly to target
+			dx = target.x - fly.x;
+			dy = target.y - fly.y;
+			if( Math.sqrt( dx * dx + dy * dy) <= radius) {
+				// get a new target
+				do {
+					target.x = getRnd( canvas.width);
+					target.y = getRnd( canvas.height);
+					dx = target.x - fly.x;
+					dy = target.y - fly.y;
+				} while( Math.sqrt( dx * dx + dy * dy) <= radius);
+			}
+			
+			// update chain
+			for( i = 1; i < chain.length; i++) {
+				point = chain[i];
+				target = chain[i-1];
+				point.x += k * (target.x - point.x);
+				point.y += k * (target.y - point.y);
+			}
+			
+			// erase canvas
+			ctx.fillStyle = "rgba(0,0,0,0.1)";
+			ctx.fillRect( 0, 0, canvas.width, canvas.height);
+			
+			// draw
+			target = chain[0];
+			ctx.fillStyle = "rgb(128,128,128)";
+			ctx.fillRect( target.x - 5, target.y, 10, 1);
+			ctx.fillRect( target.x, target.y - 5, 1, 10);
+
+			ctx.fillStyle = "white";
+		    ctx.beginPath();
+			ctx.arc( fly.x, fly.y, 3, 0, Math.PI * 2);
+			ctx.fill();
+		}
+		
+		render();
+
+		
+	</script>
+</body>
+</html>
